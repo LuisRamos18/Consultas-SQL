@@ -1,0 +1,32 @@
+WITH entradas AS (
+  SELECT T1.Descripcion AS Almacen,T3.INSUMO, SUM(T3.CANTIDAD) AS CANTIDAD, SUM(T3.IMPORTE) AS IMPORTE
+  FROM dba.si_movimientos AS T0
+  INNER JOIN dba.si_almacen AS T1 ON T0.almacen = T1.ALMACEN
+  INNER JOIN dba.si_tm AS T2 ON T0.tipo_mov = T2.TM_INVENTARIO
+  INNER JOIN dba.si_movimientos_det AS T3 ON T0.almacen = T3.ALMACEN AND T0.tipo_mov = T3.TIPO_MOV AND T0.numero = T3.NUMERO
+  WHERE T0.almacen = 1 AND T0.tipo_mov BETWEEN 1 AND 7 AND T0.fecha <=TODAY()
+  GROUP BY Almacen,T3.INSUMO
+),
+salidas AS (
+  SELECT T1.Descripcion AS Almacen,T3.INSUMO, SUM(T3.CANTIDAD) AS CANTIDAD, SUM(T3.IMPORTE) AS IMPORTE
+  FROM dba.si_movimientos AS T0
+  INNER JOIN dba.si_almacen AS T1 ON T0.almacen = T1.ALMACEN
+  INNER JOIN dba.si_tm AS T2 ON T0.tipo_mov = T2.TM_INVENTARIO
+  INNER JOIN dba.si_movimientos_det AS T3 ON T0.almacen = T3.ALMACEN AND T0.tipo_mov = T3.TIPO_MOV AND T0.numero = T3.NUMERO
+  WHERE T0.almacen = 1 AND T0.tipo_mov BETWEEN 51 AND 57 AND T0.fecha <=TODAY()
+   GROUP BY Almacen,T3.INSUMO
+)
+
+SELECT entradas.Almacen,entradas.INSUMO,T4.DESCRIPCION,T4.UNIDAD,
+
+CASE WHEN salidas.CANTIDAD IS NULL THEN entradas.CANTIDAD - 0
+ELSE entradas.CANTIDAD - salidas.CANTIDAD END AS SALDO_CANTIDAD,
+
+CASE WHEN salidas.IMPORTE IS NULL THEN entradas.IMPORTE - 0
+ELSE entradas.IMPORTE -salidas.IMPORTE END AS SALDO_IMPORTE
+
+FROM entradas 
+LEFT JOIN salidas ON entradas.INSUMO = salidas.INSUMO
+INNER JOIN dba.insumos AS T4 ON entradas.INSUMO = T4.INSUMO
+WHERE SALDO_CANTIDAD > 0
+ORDER BY entradas.INSUMO;

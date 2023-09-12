@@ -1,0 +1,11 @@
+WITH FE AS (SELECT T0.almacen, T1.insumo, MAX(CONVERT(DATETIME,T0.FECHA_REGISTRO)) AS Fecha_Max
+FROM dba.si_movimientos AS T0
+INNER JOIN dba.si_movimientos_det AS T1 ON T0.almAcen = T1.almacen AND T0.tipo_mov = T1.tipo_mov AND T0.numero = T1.numero
+GROUP BY T0.almacen, T1.insumo
+order by T1.insumo)
+
+SELECT T2.almacen, T2.tipo_mov, T2.numero,T3.insumo, T3.precio, CONVERT(DATETIME,T2.FECHA_REGISTRO) as Fecha
+FROM dba.si_movimientos AS T2
+INNER JOIN dba.si_movimientos_det AS T3 ON T2.almAcen = T3.almacen AND T2.tipo_mov = T3.tipo_mov AND T2.numero = T3.numero
+INNER JOIN FE ON T2.almacen = FE.almacen AND T3.insumo = FE.insumo AND Fecha = FE.Fecha_Max
+ORDER BY T3.insumo

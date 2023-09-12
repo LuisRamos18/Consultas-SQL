@@ -1,0 +1,17 @@
+WITH SAL AS (SELECT T0.almacen, T0.tipo_mov, T0.insumo, T0.cantidad , T0.precio, T0.cantidad*T0.precio AS Importe, T0.numero, T1.FECHA, T1.HORA
+FROM dba.si_movimientos_det AS T0
+INNER JOIN dba.si_movimientos AS T1 ON T0.almacen = T1.almacen AND T0.tipo_mov = T1.tipo_mov AND T0.numero = T1.numero
+WHERE T0.ALMACEN = 2 AND (T0.tipo_mov = 51 OR T0.tipo_mov = 57) AND FECHA <= '2023/04/28'
+ORDER BY T0.numero),
+
+SALM AS (SELECT T0.insumo,MAX(T0.numero) AS MAXIMO
+FROM dba.si_movimientos_det AS T0
+INNER JOIN dba.si_movimientos AS T1 ON T0.almacen = T1.almacen AND T0.tipo_mov = T1.tipo_mov AND T0.numero = T1.numero
+WHERE T0.ALMACEN = 2 AND (T0.tipo_mov = 51 OR T0.tipo_mov = 57) AND FECHA <= '2023/04/28'
+GROUP BY T0.insumo
+ORDER BY T0.insumo)
+
+SELECT SAL.almacen, SAL.tipo_mov, SAL.insumo, SAL.cantidad , SAL.precio, SAL.Importe, SAL.numero, SAL.FECHA, SAL.HORA
+FROM SAL
+INNER JOIN SALM ON SALM.MAXIMO = SAL.numero
+ORDER BY SAL.insumo

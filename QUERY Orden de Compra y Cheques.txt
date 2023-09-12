@@ -1,0 +1,16 @@
+SELECT T0.cc, T0.numero, T0.fecha AS Fecha_OC, T0.comprador AS Id_comprador,T7.descripcion AS Comprador, T0. proveedor,T6.DSCONTRATISTA, T1.partida, T1.insumo,
+
+CASE WHEN T5.DSTARJETA IS NULL THEN T4.DESCRIPCION
+ELSE T5.DSTARJETA END AS DESCRIPCION, 
+
+T1.fecha_entrega, T1.importe, T1.obra, T1.estimacion_id,
+T2.factura,T2.concepto, T2.monto, T3.concepto AS Cheque
+FROM dba.so_orden_compra as T0
+INNER JOIN dba.so_orden_compra_det T1 on T0.cc = T1.cc and T0.numero = T1.numero
+INNER JOIN dba.sp_movprov T2 on T0.numero = T2.referenciaoc and T0.cc = T2.cc and T0.proveedor = T2.numpro
+INNER JOIN dba.sp_movprov T3 on T2.factura = T3.factura and T3.referenciaoc = 0
+INNER JOIN dba.insumos T4 ON T1.INSUMO = T4.INSUMO
+LEFT JOIN dba.SU_TARJETAS_OBRA T5 on T1.obra = T5.obra and T1.insumo = T5.TARJETA
+INNER JOIN dba.SU_CONTRATISTAS T6 ON T0. proveedor = T6.NUMPRO
+INNER JOIN dba.empleados T7 on T0.comprador = T7.empleado 
+ORDER BY T0.numero
